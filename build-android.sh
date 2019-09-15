@@ -28,12 +28,16 @@
 # -----------------------
 
 BOOST_VER1=1
-BOOST_VER2=70
+BOOST_VER2=71
 BOOST_VER3=0
-register_option "--boost=<version>" boost_version "Boost version to be used, one of {1.70.0, 1.69.0, 1.68.0, 1.67.0, 1.66.0, 1.65.1, 1.55.0, 1.54.0, 1.53.0, 1.49.0, 1.48.0, 1.45.0}, default is 1.70.0."
+register_option "--boost=<version>" boost_version "Boost version to be used, one of {1.71.0 1.70.0, 1.69.0, 1.68.0, 1.67.0, 1.66.0, 1.65.1, 1.55.0, 1.54.0, 1.53.0, 1.49.0, 1.48.0, 1.45.0}, default is 1.71.0."
 boost_version()
 {
-  if [ "$1" = "1.70.0" ]; then
+  if [ "$1" = "1.71.0" ]; then
+    BOOST_VER1=1
+    BOOST_VER2=71
+    BOOST_VER3=0
+  elif [ "$1" = "1.70.0" ]; then
     BOOST_VER1=1
     BOOST_VER2=70
     BOOST_VER3=0
@@ -415,7 +419,9 @@ then
   	exit 1
   fi
   cd $PROGDIR
-  
+  echo "finish boost bootstrap, check bjam manually"
+  echo "if not exist, copy it from the same location as b2"
+  read
   # -------------------------------------------------------------
   # Patching will be done only if we had a successfull bootstrap!
   # -------------------------------------------------------------
@@ -439,35 +445,38 @@ then
   else
       cp configs/user-config-${CONFIG_VARIANT}-${BOOST_VER}.jam $BOOST_DIR/tools/build/v2/user-config.jam || exit 1
   fi
-
-  for dir in $PATCH_BOOST_DIR; do
-    if [ ! -d "$dir" ]; then
-      echo "Could not find directory '$dir' while looking for patches"
-      exit 1
-    fi
-
-    PATCHES=`(cd $dir && ls *.patch | sort) 2> /dev/null`
-
-    if [ -z "$PATCHES" ]; then
-      echo "No patches found in directory '$dir'"
-      exit 1
-    fi
-
-    for PATCH in $PATCHES; do
-      PATCH=`echo $PATCH | sed -e s%^\./%%g`
-      SRC_DIR=$PROGDIR/$BOOST_DIR
-      PATCHDIR=`dirname $PATCH`
-      PATCHNAME=`basename $PATCH`
-      log "Applying $PATCHNAME into $SRC_DIR/$PATCHDIR"
-      cd $SRC_DIR && patch -p1 < $dir/$PATCH && cd $PROGDIR
-      if [ $? != 0 ] ; then
-        dump "ERROR: Patch failure !! Please check your patches directory!"
-        dump "       Try to perform a clean build using --clean ."
-        dump "       Problem patch: $dir/$PATCHNAME"
-        exit 1
-      fi
-    done
-  done
+  
+  echo "do the patch manually"
+  read
+  
+  #for dir in $PATCH_BOOST_DIR; do
+  #  if [ ! -d "$dir" ]; then
+  #    echo "Could not find directory '$dir' while looking for patches"
+  #    exit 1
+  #  fi
+  #
+  #  PATCHES=`(cd $dir && ls *.patch | sort) 2> /dev/null`
+  #
+  #  if [ -z "$PATCHES" ]; then
+  #    echo "No patches found in directory '$dir'"
+  #    exit 1
+  #  fi
+  #
+  #  for PATCH in $PATCHES; do
+  #    PATCH=`echo $PATCH | sed -e s%^\./%%g`
+  #    SRC_DIR=$PROGDIR/$BOOST_DIR
+  #    PATCHDIR=`dirname $PATCH`
+  #    PATCHNAME=`basename $PATCH`
+  #    log "Applying $PATCHNAME into $SRC_DIR/$PATCHDIR"
+  #    cd $SRC_DIR && patch -p1 < $dir/$PATCH && cd $PROGDIR
+  #    if [ $? != 0 ] ; then
+  #      dump "ERROR: Patch failure !! Please check your patches directory!"
+  #      dump "       Try to perform a clean build using --clean ."
+  #      dump "       Problem patch: $dir/$PATCHNAME"
+  #      exit 1
+  #    fi
+  #  done
+  #done
 fi
 
 echo "# ---------------"
